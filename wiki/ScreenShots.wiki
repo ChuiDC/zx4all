@@ -1,13 +1,17 @@
 #summary ScreenShots of zx4all
 
-= Introduction =
+= Screen shots of Menu =
 
-Add your content here.
+Taken on Linux 86 machine with Beta 2
 
+== screenshot_zx4all_filemanager.png ==
 
-= Details =
+http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_filemanager.png
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== screenshot_zx4all_main_menu.png ==
+
+http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_main_menu.png
+
+== screenshot_zx4all_options.png ==
+
+http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_options.png
