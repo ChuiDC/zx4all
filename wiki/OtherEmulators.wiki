@@ -1,0 +1,17 @@
+#summary Other Open Source Emulators
+
+= Spectrum Emulators =
+
+  * http://fuse-emulator.sourceforge.net/
+  * http://code.google.com/p/xpectrum/
+  * http://code.google.com/p/unrealspeccyp - Unreal Speccy Portable (pure) SDL eme, zx81 and 12K, partial disk support (no DSK support)
+  * http://sz81.sourceforge.net - SDL based, zx81 ONLY
+  * GP2XPectrum
+    * http://wiki.gp2x.org/wiki/GP2Xpectrum - GP2X 
+    * http://dl.openhandhelds.org/cgi-bin/caanoo.cgi?0,0,0,0,46,462 Caanoo version of GP2XPectrum has some SDL code (and some Linux specific stuff, like keyboard and sound).
+
+= Z80 CPU Emulators =
+
+  * http://caesar.logiqx.com/php/library.php?id=raze - RAZE (Multi Asm Z80 Engine), used in this project for x86 when asm is available
+  * http://www.zophar.net/z80.html
+
