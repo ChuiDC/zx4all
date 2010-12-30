@@ -4,14 +4,18 @@
 
 Taken on Linux 86 machine with Beta 2
 
-== screenshot_zx4all_filemanager.png ==
+== Menu Filemanager ==
 
 http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_filemanager.png
 
-== screenshot_zx4all_main_menu.png ==
+== Main menu ==
 
 http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_main_menu.png
 
-== screenshot_zx4all_options.png ==
+== Menu Options ==
 
 http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_options.png
+
+== Spectrum +3 with Virtual On Screen Keyboard ==
+
+http://zx4all.googlecode.com/svn/wiki/screenshots/screenshot_zx4all_emu_vkbd.png
