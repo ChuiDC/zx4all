@@ -30,7 +30,7 @@ MORE_CFLAGS = -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-
 #MORE_CFLAGS += -Di686 -march=i686 
 MORE_CFLAGS += -DUSE_LIBAYEMU
 #MORE_CFLAGS += -DNO_THREADS
-MORE_CFLAGS += -DFULLSCREEN
+#MORE_CFLAGS += -DFULLSCREEN
 
 #MORE_CFLAGS += -DNO_MENU
 #MORE_CLFAGS += -DNAME_CAPTION=\"ASTRO 2008\"
@@ -54,7 +54,7 @@ MORE_CFLAGS += -DNOSOUND  # disable sound support
 ##MORE_CFLAGS += -DDEBUG_FRAMERATE
 ##MORE_CFLAGS += -DDEBUG_TSTADOS
 #MORE_CFLAGS += -DUSE_MASCARA_AF
-MORE_CFLAGS += -DINTERNAL_MENU_SCREENSHOT  # enable screen shots in menu (Pause key), not (yet) in emu
+MORE_CFLAGS += -DINTERNAL_MENU_SCREENSHOT  # enable screen shots in menu (Pause key), and in emulator
 
 ifndef TV_FILTER
 MORE_CFLAGS += -DNO_USE_TV_FILTER
