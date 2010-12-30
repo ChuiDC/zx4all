@@ -1342,6 +1342,11 @@ void read_keyboard () {
 			set_volume (cmpt.volume + 4);
 			break;
 */
+#ifdef INTERNAL_MENU_SCREENSHOT
+				case SDLK_PAUSE:
+								vid_screenshot(NULL);
+								break;
+#endif /* INTERNAL_MENU_SCREENSHOT */
 		default:
 			to_menu=0;
 
