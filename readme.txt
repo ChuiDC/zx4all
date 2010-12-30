@@ -1,4 +1,10 @@
- `.---::::-::::::::::--     `.---::::--:::::::::--     `.---::::--::::::::::-`  
+
+Latest version available from:
+
+ * http://chui.dcemu.co.uk/zx4all.html
+ * http://zx4all.googlecode.com
+
+`.---::::-::::::::::--     `.---::::--:::::::::--     `.---::::--::::::::::-`  
  -:``````````````````-:+.   ./``````````````````.:+.   `/``````````````````.:/- 
  -/    `.--..-.`     .:s.   ./     `.    ``     `-s-   ./`       `.``      `-o: 
  -/    ydmddddds     .:s.   .+    :ods: oyh+.   `-s-   .+`      :odh/      `-o/ 
@@ -137,3 +143,5 @@ http://dcevolution.net/DCHelp/index.php?id=sbind
 
 Place your .Z80 files when you want it, ZX4ALL have filemanager.
 
+
+                            http://zx4all.googlecode.com

@@ -1,17 +1,33 @@
+#
+# zx4all Linux (x86) Makefile
+# 
+# Example usage:
+# 
+#   make -B -f Makefile.linux     # Force rebuild
+#   make -f Makefile.linux
+# 
+# 
+
 NAME   = zx4all
 O      = o
 RM     = rm -f
-CC     = gcc-3.4
-CXX    = g++-3.4
+CC     = gcc
+CXX    = g++
 STRIP  = strip
+# known to work with gcc-3.4 and gcc version 4.2.2 and SDL 1.2
 
-RAZE = 1
-TV_FILTER =1
+# RAZE - enable assembler support
+#RAZE = 1
+
+
+# TV_FILTER - enables OpenGL support
+#TV_FILTER =1
 
 DEFAULT_CFLAGS = `sdl-config --cflags`
 LDFLAGS        = `sdl-config --static-libs` -lSDL_mixer -lSDL_image -lz
 
-MORE_CFLAGS = -Di686 -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3 -march=i686 -DDATA_PREFIX=\"./data/\" -DROM_PATH_PREFIX=\"./data\" -DSNAP_PATH_PREFIX=\"./example\" -DTAP_PATH_PREFIX=\"./example\" -DMDR_PATH_PREFIX=\"./example\"
+MORE_CFLAGS = -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3  -DDATA_PREFIX=\"./data/\" -DROM_PATH_PREFIX=\"./data\" -DSNAP_PATH_PREFIX=\"./example\" -DTAP_PATH_PREFIX=\"./example\" -DMDR_PATH_PREFIX=\"./example\"
+#MORE_CFLAGS += -Di686 -march=i686 
 MORE_CFLAGS += -DUSE_LIBAYEMU
 #MORE_CFLAGS += -DNO_THREADS
 MORE_CFLAGS += -DFULLSCREEN
@@ -33,7 +49,7 @@ MORE_CFLAGS += -DFULLSCREEN
 #MORE_CFLAGS += -DAUTO_EVENTS
 #MORE_CFLAGS += -DAUTO_TAPE=\"ineed.tzx\"
 ##MORE_CFLAGS += -DAUTO_SNAPSHOT=\"h4.z80\"
-#MORE_CFLAGS += -DNOSOUND
+MORE_CFLAGS += -DNOSOUND  # disable sound support
 ##MORE_CFLAGS += -DSOUND_IOCTL
 ##MORE_CFLAGS += -DDEBUG_FRAMERATE
 ##MORE_CFLAGS += -DDEBUG_TSTADOS

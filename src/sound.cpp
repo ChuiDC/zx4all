@@ -386,5 +386,7 @@ void zx4all_play_click(void)
 #endif
 }
 
-
-#endif
+#else /* NOSOUND */
+/* Disable sound */
+int closing_sound=0;
+#endif /* NOSOUND */
