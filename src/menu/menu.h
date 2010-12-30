@@ -47,6 +47,9 @@ int run_menuLoadSNAP();
 int run_menuLoadTAPE();
 int run_menuOpt();
 
+int vid_screenshot(char *filename);
+
+
 #else
 
 #define text_draw_background()

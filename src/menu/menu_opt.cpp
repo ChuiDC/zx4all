@@ -365,6 +365,11 @@ static inline int key_menuOpt(void)
 				case SDLK_F8: TV_ToggleScanlines();break;
 //				case SDLK_F9: TV_ToggleTV();break;
 #endif
+#ifdef INTERNAL_MENU_SCREENSHOT
+				case SDLK_PAUSE:
+								vid_screenshot(NULL);
+								break;
+#endif /* INTERNAL_MENU_SCREENSHOT */
 			}
 		}
 	}

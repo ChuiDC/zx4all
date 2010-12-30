@@ -336,6 +336,55 @@ static int set_pos_by_mouse(int posx, int posy, int click)
 	return 0;
 }
 
+/*
+**  TakeScreenShot of SDL surface, only needs SDL lib
+**      surface is optional, if NULL is specified use the main video
+**      filename is optional, if NULL is specified use SCREENSHOT_DEFAULT_FILENAME
+**
+**  Saves BMP files (SDL has built in support for BMP).
+**  If no filename is provided a default name is used (which may
+**  overwrite existing files).
+*/
+#define SCREENSHOT_DEFAULT_FILENAME "screenshot_zx4all.bmp"
+void TakeScreenShot(SDL_Surface *screen_to_save, char *filename)
+{
+    char *local_filename=NULL;
+    SDL_Surface *local_screen=NULL;
+    
+    local_screen = screen_to_save;
+    local_filename = filename;
+    
+    if (local_screen == NULL)
+    {
+        local_screen = SDL_GetVideoSurface();
+        
+        /*
+        or if there is global screen ref go grab it ...
+        extern SDL_Surface *screen;
+        
+        local_screen = screen;
+        */
+    }
+    if (local_filename == NULL)
+    {
+        local_filename = SCREENSHOT_DEFAULT_FILENAME;
+        /* TODO scan local dir and derive name? Use timestamp (note Dingoo has no clock). */
+    }
+    
+    SDL_SaveBMP(local_screen, local_filename);
+    /*
+    ** If SDL_image is available it is possible to save SDL surfaces
+    ** to a PNG with the use of some glue code. See:
+    ** http://stackoverflow.com/questions/718933/how-to-save-an-sdl-surface-to-a-png-and-get-the-colors-right/719636#719636
+    */
+}
+
+int vid_screenshot(char *filename)
+{
+    TakeScreenShot(screen, filename);
+    return 0;
+}
+
 static int key_mainMenu(void)
 {
 	static int mouse_x=0;
@@ -406,6 +455,11 @@ static int key_mainMenu(void)
 //				case SDLK_F9: TV_ToggleTV();break;
 #endif
 				case SDLK_ESCAPE: hit0=1; c=7; break;
+#ifdef INTERNAL_MENU_SCREENSHOT
+				case SDLK_PAUSE:
+								vid_screenshot(NULL);
+								break;
+#endif /* INTERNAL_MENU_SCREENSHOT */
 			}
 		}
 		if (hit1)
