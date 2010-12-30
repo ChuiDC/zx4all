@@ -1,0 +1,7 @@
+#summary Current dev/testing plans
+
+= To Do List =
+
+Some of these items may become [http://code.google.com/p/zx4all/issues/list Issues]
+
+  * Test game HighwayEnconter
