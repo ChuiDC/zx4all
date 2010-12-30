@@ -1,0 +1,112 @@
+TARGET = zx4all
+
+KOS_CFLAGS+= -I$(KOS_BASE)/addons/include/SDL -I$(KOS_BASE)/addons/include -Isrc -Isrc/z80 -Isrc/unzip -Isrc/menu -DDREAMCAST
+
+KOS_CFLAGS+= -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing
+KOS_CFLAGS += -DDATA_PREFIX="/rd/"
+#KOS_CFLAGS += -DDATA_PREFIX="/cd/exec/data/"
+KOS_CFLAGS += -DROM_PATH_PREFIX="/rd"
+#KOS_CFLAGS += -DROM_PATH_PREFIX="/cd/exec/data"
+KOS_CFLAGS += -DSNAP_PATH_PREFIX="/rd"
+#KOS_CFLAGS += -DSNAP_PATH_PREFIX="/cd"
+KOS_CFLAGS += -DTAP_PATH_PREFIX="/rd"
+#KOS_CFLAGS += -DTAP_PATH_PREFIX="/cd"
+KOS_CFLAGS += -DMDR_PATH_PREFIX="/rd"
+#KOS_CFLAGS += -DMDR_PATH_PREFIX="/cd"
+KOS_CFLAGS += -DNO_USE_TV_FILTER
+KOS_CFLAGS += -DUSE_LIBAYEMU
+
+#KOS_CFLAGS += -DNO_MENU
+#KOS_CFLAGS += -DDEBUG_ZX4ALL
+##KOS_CFLAGS += -DDEBUG_ZX4ALL_FFLUSH
+#KOS_CFLAGS += -DDEBUG_Z80
+#KOS_CFLAGS += -DDEBUG_MEMORY
+#KOS_CFLAGS += -DDEBUG_Z80_CYCLING
+##KOS_CFLAGS += -DDEBUG_PRESTART=529497
+##KOS_CFLAGS += -DDEBUG_START=859496
+##KOS_CFLAGS += -DDEBUG_END=859497
+#KOS_CFLAGS += -DDEBUG_START=55000
+#KOS_CFLAGS += -DDEBUG_END=56000
+#KOS_CFLAGS += -DAUTO_EVENTS
+#KOS_CFLAGS += -DNOSOUND
+##KOS_CFLAGS += -DDEBUG_FRAMERATE
+##KOS_CFLAGS += -DDEBUG_TSTADOS
+#KOS_CFLAGS += -DUSE_MASCARA_AF
+##KOS_CFLAGS += -DAUTO_SNAPSHOT="/cd/exec/pandemia.z80"
+#KOS_CFLAGS += -DAUTO_TAPE="/cd/exec/ilogicall.tzx"
+#KOS_CFLAGS += -DAUTO_TAPE="/cd/cannon.tzx"
+#KOS_CFLAGS += -DEXECUTE_FSL="/cd/fsl.bin"
+
+RAZE = 1
+
+
+KOS_CPPFLAGS=-fno-operator-names -fno-exceptions $(KOS_CFLAGS)
+
+all: $(TARGET).bin
+
+include $(KOS_BASE)/Makefile.rules
+
+
+OBJS =	\
+	src/main.o \
+	src/snapshot.o \
+	src/characters.o \
+	src/computer.o \
+	src/microdrive.o \
+	src/sound.o \
+	src/spk_ay.o \
+	src/tape.o \
+	src/debug.o \
+	src/libayemu/ay8912.o \
+	src/vkbd/vkbd.o \
+	src/vtape/vtape.o \
+	src/menu/fade.o \
+	src/menu/sfont.o \
+	src/menu/menu.o \
+	src/menu/menu_load.o \
+	src/menu/menu_main.o \
+	src/menu/menu_opt.o \
+	src/unzip/explode.o \
+	src/unzip/unreduce.o \
+	src/unzip/unshrink.o \
+	src/unzip/unzip.o \
+	romdisk.o
+
+src/z80/faze/raze.s: src/z80/faze/raze.s.m4
+	m4 -Isrc/z80/faze/ src/z80/faze/raze.s.m4 > src/z80/faze/raze.s
+
+src/z80/faze/raze.o: src/z80/faze/raze.s
+
+ifdef RAZE
+CFLAGS+= -DUSE_RAZE
+OBJS += src/z80/faze/raze.o
+else
+OBJS += src/z80/Z80/Z80.o 
+endif
+
+
+clean:
+	rm -f $(OBJS) $(TARGET).elf $(TARGET).bin  romdisk.o romdisk.img example.iso src/z80/faze/raze.s
+
+$(TARGET).elf: $(OBJS)
+	$(KOS_CC) $(KOS_CFLAGS) $(KOS_LDFLAGS) -o $(TARGET).elf $(KOS_START) \
+	$(OBJS) -lSDL_mixer_126 -lSDL_image_124 -lSDL_1213 -lpng_128 -lz_123 $(OBJEXTRA) -lm $(KOS_LIBS)
+
+$(TARGET).bin: $(TARGET).elf
+	$(KOS_OBJCOPY) -R .stack -O binary $(TARGET).elf $(TARGET).bin
+
+romdisk.o: romdisk.img
+	$(KOS_BASE)/utils/bin2o/bin2o romdisk.img romdisk romdisk.o
+#	bin2odc romdisk.img romdisk.o
+
+romdisk.img: data
+	$(KOS_GENROMFS) -f romdisk.img -d data -v
+
+example.iso: example
+	mkisofs -l -o example.iso -graft-points /=example/
+
+
+run: $(TARGET).bin example.iso
+	$(KOS_LOADER) $(TARGET).bin -i example.iso
+#	$(KOS_LOADER) $(TARGET).bin
+

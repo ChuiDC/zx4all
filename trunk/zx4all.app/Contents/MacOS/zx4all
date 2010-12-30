@@ -1,0 +1,14 @@
+#!/bin/sh
+
+isx86=`uname -p|grep 86`
+
+cd `dirname $0`/../Resources
+
+if
+	[ "$isx86" = "" ]
+then
+	exec ../MacOS/zx4all.ppc
+else
+	exec ../MacOS/zx4all.i386
+fi
+
