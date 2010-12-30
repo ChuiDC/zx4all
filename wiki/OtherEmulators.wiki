@@ -4,7 +4,7 @@
 
   * http://fuse-emulator.sourceforge.net/
   * http://code.google.com/p/xpectrum/
-  * http://code.google.com/p/unrealspeccyp - Unreal Speccy Portable (pure) SDL eme, zx81 and 12K, partial disk support (no DSK support)
+  * http://code.google.com/p/unrealspeccyp - Unreal Speccy Portable (pure) SDL, zx81 and 128K support, partial disk support (no DSK support)
   * http://sz81.sourceforge.net - SDL based, zx81 ONLY
   * GP2XPectrum
     * http://wiki.gp2x.org/wiki/GP2Xpectrum - GP2X 
@@ -14,4 +14,3 @@
 
   * http://caesar.logiqx.com/php/library.php?id=raze - RAZE (Multi Asm Z80 Engine), used in this project for x86 when asm is available
   * http://www.zophar.net/z80.html
-
