@@ -54,6 +54,7 @@ MORE_CFLAGS += -DNOSOUND  # disable sound support
 ##MORE_CFLAGS += -DDEBUG_FRAMERATE
 ##MORE_CFLAGS += -DDEBUG_TSTADOS
 #MORE_CFLAGS += -DUSE_MASCARA_AF
+MORE_CFLAGS += -DINTERNAL_MENU_SCREENSHOT  # enable screen shots in menu (Pause key), not (yet) in emu
 
 ifndef TV_FILTER
 MORE_CFLAGS += -DNO_USE_TV_FILTER
