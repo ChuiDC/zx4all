@@ -1,0 +1,134 @@
+NAME   = zx4all
+O      = o
+RM     = rm -f
+CC     = gcc
+CXX    = g++
+STRIP  = strip
+
+
+RAZE = 1
+TV_FILTER =1
+
+DEFAULT_CFLAGS = `sdl-config --cflags` -I/usr/local/include 
+LDFLAGS        = `sdl-config --libs` -lSDL_mixer -lSDL_image 
+
+MORE_CFLAGS = -Di686 -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3 -march=i686 -DDATA_PREFIX=\"./data/\" -DROM_PATH_PREFIX=\"./data\" -DSNAP_PATH_PREFIX=\"./example\" -DTAP_PATH_PREFIX=\"./example\" -DMDR_PATH_PREFIX=\"./example\"
+MORE_CFLAGS += -DUSE_LIBAYEMU
+#MORE_CFLAGS += -DNO_THREADS
+MORE_CFLAGS += -DFULLSCREEN
+
+MORE_CFLAGS += -DNO_MENU
+#MORE_CLFAGS += -DNAME_CAPTION=\"VEGA SOLARIS\"
+#MORE_CLFAGS += -DNAME_CAPTION=\"ASTRO 2008\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"Viaje\ al\ centro\ de\ la\ tierra\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"ANOTHER\ BRICK\ ON\ THE\ WALL\ 2\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"REVELADOS\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"SOKOBAN\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"ZX-MINES\ 2\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"ZX-POKER\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"BETILED!\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"CANNON\ BUBBLE\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"COLUMNS\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"GALAXY\ FIGHTER\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"PHANTOMAS\ SAGA:\ INFINITY\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"JUDGE\ MORRY\ VS.\ BALDO\ MIDGET\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"MOGGY\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"NANAKO\ IN\ CLASSIC\ JAPANESE\ MONSTER\ CASTLE\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"PHANTOMASA\ 2\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"PITFALL-ZX\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"RAGNABLOCK\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"RUN\ BILL\ RUN\"
+
+#MORE_CFLAGS += -DDEBUG_ZX4ALL
+#MORE_CFLAGS += -DDEBUG_ZX4ALL_FFLUSH
+#MORE_CFLAGS += -DDEBUG_TZX
+#MORE_CFLAGS += -DDEBUG_Z80
+#MORE_CFLAGS += -DDEBUG_MEMORY
+#MORE_CFLAGS += -DDEBUG_START=4587
+#MORE_CFLAGS += -DDEBUG_END=5000
+#MORE_CFLAGS += -DAUTO_EVENTS
+#MORE_CFLAGS += -DAUTO_SNAPSHOT=\"snap.z80\"
+MORE_CFLAGS += -DAUTO_TAPE=\"tape.tzx\"
+#MORE_CFLAGS += -DAUTO_TAPE=\"RUNBILL.TZX\"
+#MORE_CFLAGS += -DNOSOUND
+#MORE_CFLAGS += -DDEBUG_FRAMERATE
+#MORE_CFLAGS += -DDEBUG_TSTADOS
+#MORE_CFLAGS += -DUSE_MASCARA_AF
+
+#MORE_CFLAGS += -DEXECUTE_FSL=\"cez.exe\"
+
+ifndef TV_FILTER
+MORE_CFLAGS += -DNO_USE_TV_FILTER
+PROG   = $(NAME)_sw
+else
+PROG   = $(NAME)
+endif
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS) -Isrc -Isrc/z80 -Isrc/unzip -Isrc/menu
+CPPFLAGS  = $(CFLAGS)
+
+all: $(PROG)
+
+src/z80/raze/raze1.asm: src/z80/raze/raze.asm
+	nasm -f win32 -e src/z80/raze/raze.asm -o src/z80/raze/raze1.asm -Isrc/z80/raze/
+
+src/z80/raze/raze2.asm: src/z80/raze/raze1.asm
+	sed -e "s/z80_add_read/_z80_add_read/g" -e "s/z80_add_write/_z80_add_write/g" -e "s/z80_emulate/_z80_emulate/g" -e "s/z80_end_memmap/_z80_end_memmap/g" -e "s/z80_get_reg/_z80_get_reg/g" -e "s/z80_init_memmap/_z80_init_memmap/g" -e "s/z80_lower_IRQ/_z80_lower_IRQ/g" -e "s/z80_map_fetch/_z80_map_fetch/g" -e "s/z80_raise_IRQ/_z80_raise_IRQ/g" -e "s/z80_reset/_z80_reset/g" -e "s/z80_set_in/_z80_set_in/g" -e "s/z80_set_out/_z80_set_out/g" -e "s/z80_set_reg/_z80_set_reg/g"  -e "s/z80_stop_emulating/_z80_stop_emulating/g" src/z80/raze/raze1.asm > src/z80/raze/raze2.asm
+
+src/z80/raze/raze.o: src/z80/raze/raze2.asm
+	nasm -f win32 src/z80/raze/raze2.asm -o src/z80/raze/raze.o -psrc/z80/raze/raze.reg
+
+OBJS =	\
+	windows.o \
+	src/main.o \
+	src/snapshot.o \
+	src/characters.o \
+	src/computer.o \
+	src/microdrive.o \
+	src/sound.o \
+	src/spk_ay.o \
+	src/tape.o \
+	src/debug.o \
+	src/tvfilter/tvfilter.o \
+	src/tvfilter/texture.o \
+	src/tvfilter/scanline.o \
+	src/tvfilter/tvzw5.o \
+	src/libayemu/ay8912.o \
+	src/vkbd/vkbd.o \
+	src/vtape/vtape.o \
+	src/menu/fade.o \
+	src/menu/sfont.o \
+	src/menu/menu.o \
+	src/menu/menu_load.o \
+	src/menu/menu_main.o \
+	src/menu/menu_opt.o \
+	src/unzip/explode.o \
+	src/unzip/unreduce.o \
+	src/unzip/unshrink.o \
+	src/unzip/unzip.o 
+
+ifdef RAZE
+CFLAGS+= -DUSE_RAZE
+OBJS += src/z80/raze/raze.o
+else
+OBJS += src/z80/Z80/Z80.o 
+endif
+
+windows.o: windows.rc windows.ico
+	windres windows.rc windows.o
+
+
+$(PROG): $(OBJS)
+ifndef TV_FILTER
+	$(CC) -L/usr/local/lib -o $(PROG) -lmingw32 $(OBJS) -lSDL_static_129 -mwindows -mno-cygwin -luser32 -lgdi32 -lwinmm -ldxguid
+else
+	$(CC) -L/usr/local/lib  -L/usr/lib/w32api/ -L/usr/X11R6/lib -lglu32 -lopengl32 -o $(PROG) -lmingw32 $(OBJS)  -lglu32  -lopengl32 -lSDL_static_1212 -lGL -lpthread -mwindows -mno-cygwin -luser32 -lgdi32 -lwinmm -ldxguid
+endif
+	$(STRIP) $(PROG).exe
+
+run: $(PROG)
+	./$(PROG) example
+
+clean:
+	$(RM) $(PROG).exe $(OBJS) $(GPU_OBJS) stdout.txt stderr.txt src/z80/raze/raze2.asm
+

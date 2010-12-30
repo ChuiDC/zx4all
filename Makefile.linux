@@ -1,0 +1,106 @@
+NAME   = zx4all
+O      = o
+RM     = rm -f
+CC     = gcc-3.4
+CXX    = g++-3.4
+STRIP  = strip
+
+RAZE = 1
+TV_FILTER =1
+
+DEFAULT_CFLAGS = `sdl-config --cflags`
+LDFLAGS        = `sdl-config --static-libs` -lSDL_mixer -lSDL_image -lz
+
+MORE_CFLAGS = -Di686 -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3 -march=i686 -DDATA_PREFIX=\"./data/\" -DROM_PATH_PREFIX=\"./data\" -DSNAP_PATH_PREFIX=\"./example\" -DTAP_PATH_PREFIX=\"./example\" -DMDR_PATH_PREFIX=\"./example\"
+MORE_CFLAGS += -DUSE_LIBAYEMU
+#MORE_CFLAGS += -DNO_THREADS
+MORE_CFLAGS += -DFULLSCREEN
+
+#MORE_CFLAGS += -DNO_MENU
+#MORE_CLFAGS += -DNAME_CAPTION=\"ASTRO 2008\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"Viaje\ al\ centro\ de\ la\ tierra\"
+
+#MORE_CFLAGS += -DDEBUG_ZX4ALL
+##MORE_CFLAGS += -DDEBUG_ZX4ALL_FFLUSH
+##MORE_CFLAGS += -DDEBUG_TZX
+#MORE_CFLAGS += -DDEBUG_Z80
+##MORE_CFLAGS += -DDEBUG_Z80_STATS=50
+#MORE_CFLAGS += -DDEBUG_MEMORY
+##MORE_CFLAGS += -DDEBUG_PRESTART=529497
+#MORE_CFLAGS += -DDEBUG_Z80_CYCLING
+#MORE_CFLAGS += -DDEBUG_START=610128
+#MORE_CFLAGS += -DDEBUG_END=610130
+#MORE_CFLAGS += -DAUTO_EVENTS
+#MORE_CFLAGS += -DAUTO_TAPE=\"ineed.tzx\"
+##MORE_CFLAGS += -DAUTO_SNAPSHOT=\"h4.z80\"
+#MORE_CFLAGS += -DNOSOUND
+##MORE_CFLAGS += -DSOUND_IOCTL
+##MORE_CFLAGS += -DDEBUG_FRAMERATE
+##MORE_CFLAGS += -DDEBUG_TSTADOS
+#MORE_CFLAGS += -DUSE_MASCARA_AF
+
+ifndef TV_FILTER
+MORE_CFLAGS += -DNO_USE_TV_FILTER
+PROG   = $(NAME)_sw
+else
+PROG   = $(NAME)
+LDFLAGS += -lGL
+endif
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS) -Isrc -Isrc/z80 -Isrc/unzip -Isrc/menu
+CPPFLAGS  = $(CFLAGS)
+
+all: $(PROG)
+
+src/z80/raze/raze1.asm: src/z80/raze/raze.asm
+	nasm -e src/z80/raze/raze.asm -o src/z80/raze/raze1.asm -Isrc/z80/raze/
+
+src/z80/raze/raze.o: src/z80/raze/raze1.asm
+	nasm -f elf src/z80/raze/raze1.asm -o src/z80/raze/raze.o -psrc/z80/raze/raze.reg
+
+OBJS =	\
+	src/main.o \
+	src/snapshot.o \
+	src/characters.o \
+	src/computer.o \
+	src/microdrive.o \
+	src/sound.o \
+	src/spk_ay.o \
+	src/tape.o \
+	src/debug.o \
+	src/tvfilter/tvfilter.o \
+	src/tvfilter/texture.o \
+	src/tvfilter/scanline.o \
+	src/tvfilter/tvzw5.o \
+	src/libayemu/ay8912.o \
+	src/vkbd/vkbd.o \
+	src/vtape/vtape.o \
+	src/menu/fade.o \
+	src/menu/sfont.o \
+	src/menu/menu.o \
+	src/menu/menu_load.o \
+	src/menu/menu_main.o \
+	src/menu/menu_opt.o \
+	src/unzip/explode.o \
+	src/unzip/unreduce.o \
+	src/unzip/unshrink.o \
+	src/unzip/unzip.o 
+
+ifdef RAZE
+CFLAGS+= -DUSE_RAZE
+OBJS += src/z80/raze/raze.o
+else
+OBJS += src/z80/Z80/Z80.o 
+endif
+
+
+$(PROG): $(OBJS) 
+	$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LDFLAGS)
+	$(STRIP) $(PROG)
+
+
+run: $(PROG) 
+	./$(PROG)
+
+clean:
+	$(RM) $(PROG) $(OBJS) src/z80/raze/raze_.asm

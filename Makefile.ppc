@@ -1,0 +1,93 @@
+NAME   = zx4all.ppc
+O      = o
+RM     = rm -f
+CC     = gcc
+CXX    = g++
+STRIP  = strip
+
+PROG   = zx4all.app/Contents/MacOS/$(NAME)
+
+all: $(PROG)
+
+DEFAULT_CFLAGS = `sdl-config --cflags` -I/usr/include/malloc
+LDFLAGS        = -lSDL_mixer `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz
+
+TV_FILTER = 1
+
+MORE_CFLAGS = -O3 -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -DDATA_PREFIX=\"./\" -DROM_PATH_PREFIX=\"./\" -DSNAP_PATH_PREFIX=\"../../../\" -DTAP_PATH_PREFIX=\"../../../\" -DMDR_PATH_PREFIX=\"../../../\" -DZX4ALL_BIG_ENDIAN -DMACOSX
+
+#MORE_CFLAGS += -DUSE_LIBAYEMU
+#MORE_CFLAGS += -DNO_THREADS
+MORE_CFLAGS += -DFULLSCREEN
+
+#MORE_CFLAGS += -DNO_MENU
+#MORE_CLFAGS += -DNAME_CAPTION=\"ASTRO 2008\"
+#MORE_CFLAGS += -DNAME_CAPTION=\"Viaje\ al\ centro\ de\ la\ tierra\"
+
+#MORE_CFLAGS += -DDEBUG_ZX4ALL
+##MORE_CFLAGS += -DDEBUG_ZX4ALL_FFLUSH
+##MORE_CFLAGS += -DDEBUG_TZX
+#MORE_CFLAGS += -DDEBUG_Z80
+##MORE_CFLAGS += -DDEBUG_Z80_STATS=50
+#MORE_CFLAGS += -DDEBUG_MEMORY
+#MORE_CFLAGS += -DDEBUG_START=20000
+#MORE_CFLAGS += -DDEBUG_END=25000
+#MORE_CFLAGS += -DAUTO_EVENTS
+##MORE_CFLAGS += -DAUTO_SNAPSHOT=\"snap.z80\"
+##MORE_CFLAGS += -DAUTO_TAPE=\"tape.tzx\"
+##MORE_CFLAGS += -DNOSOUND
+##MORE_CFLAGS += -DSOUND_IOCTL
+##MORE_CFLAGS += -DDEBUG_FRAMERATE
+##MORE_CFLAGS += -DDEBUG_TSTADOS
+##MORE_CFLAGS += -DUSE_MASCARA_AF
+
+ifndef TV_FILTER
+MORE_CFLAGS += -DNO_USE_TV_FILTER
+else
+#MORE_CFLAGS += -DDEBUG_TVFILTER
+LDFLAGS += -framework OpenGL
+endif
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS) -Isrc -Isrc/z80 -Isrc/unzip -Isrc/menu
+CPPFLAGS  = $(CFLAGS)
+
+OBJS =	\
+	src/main.o \
+	src/snapshot.o \
+	src/characters.o \
+	src/computer.o \
+	src/microdrive.o \
+	src/sound.o \
+	src/spk_ay.o \
+	src/tape.o \
+	src/debug.o \
+	src/z80/Z80/Z80.o \
+	src/tvfilter/tvfilter.o \
+	src/tvfilter/texture.o \
+	src/tvfilter/scanline.o \
+	src/tvfilter/tvzw5.o \
+	src/libayemu/ay8912.o \
+	src/vkbd/vkbd.o \
+	src/vtape/vtape.o \
+	src/menu/fade.o \
+	src/menu/sfont.o \
+	src/menu/menu.o \
+	src/menu/menu_load.o \
+	src/menu/menu_main.o \
+	src/menu/menu_opt.o \
+	src/unzip/explode.o \
+	src/unzip/unreduce.o \
+	src/unzip/unshrink.o \
+	src/unzip/unzip.o 
+
+
+$(PROG): $(OBJS) 
+	$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LDFLAGS)
+	$(STRIP) $(PROG)
+
+
+run: $(PROG)
+	./zx4all.app/Contents/MacOS/zx4all
+
+clean:
+	$(RM) $(PROG) $(OBJS)
