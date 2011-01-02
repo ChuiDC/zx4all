@@ -4,7 +4,7 @@
 
 Some of these items may become [http://code.google.com/p/zx4all/issues/list Issues]
 
-  * Test game HighwayEnconter
+  * Test game [http://en.wikipedia.org/wiki/Highway_Encounter Highway Encounter] (NOTE in [fuse-emulator.sourceforge.net fuse] need to emulate 48K, and not a 128+2, etc.)
   * Disk Image support, DSK at the very least. See http://www.seasip.demon.co.uk/Unix/LibDsk/ ([http://fuse-emulator.sourceforge.net/FUSE] now has built in support too). Also see:
     * http://web.archive.org/web/20060215102429/andercheran.aiind.upv.es/~amstrad/docs/dsk.html (consider having a copy of this in the wiki)
     * http://web.archive.org/web/20070204005528/http://andercheran.aiind.upv.es/~amstrad/docs/extdsk.html
