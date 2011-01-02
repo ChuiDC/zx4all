@@ -4,8 +4,9 @@
 
 Some of these items may become [http://code.google.com/p/zx4all/issues/list Issues]
 
-  * Test game [http://en.wikipedia.org/wiki/Highway_Encounter Highway Encounter] (NOTE in [http://fuse-emulator.sourceforge.net fuse] need to emulate 48K, and not a 128+2, etc.)
+  * Test game [http://en.wikipedia.org/wiki/Highway_Encounter Highway Encounter] (NOTE in [http://fuse-emulator.sourceforge.net fuse] and [http://code.google.com/p/unrealspeccyp unrealspeccyp] need to emulate 48K, and not a 128+2, etc.)
   * Disk Image support, DSK at the very least. See http://www.seasip.demon.co.uk/Unix/LibDsk/ ([http://fuse-emulator.sourceforge.net/FUSE] now has built in support too). Also see:
     * http://web.archive.org/web/20060215102429/andercheran.aiind.upv.es/~amstrad/docs/dsk.html (consider having a copy of this in the wiki)
     * http://web.archive.org/web/20070204005528/http://andercheran.aiind.upv.es/~amstrad/docs/extdsk.html
   * Code appears to be pure C (not C++), rename all code (and Makefiles) to .c, convert C++ style comments "//" into "/*....*/"
+  * Doc/Wiki on usage, along with general Spectrum tips. For example, 48K tape loading, ala http://www.worldofspectrum.org/ZXSpectrum128+3Manual/chapter4.html, http://slady.net/Sinclair-ZX-Spectrum-keyboard/, http://slady.net/Sinclair-ZX-Spectrum-keyboard/layout/ Manually loading tapes is done via `LOAD ""` ("J" key, followed by Symbol-Shift+"P")
