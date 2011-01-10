@@ -213,6 +213,17 @@ void clean_screen(void)
 //	SDL_FillRect();
 }
 
+static void change_screen (SDL_Surface * pantalla)
+{
+#ifndef DREAMCAST
+	// we prepare the scanline transform arrays
+	save_screen=pantalla;
+	save_pixels=pantalla->pixels;
+#endif
+	cmpt.screen = pantalla;
+	cmpt.pixel = (void *)(((unsigned)cmpt.screen->pixels) + COMP_INIT_LINE);
+}
+
 void register_screen (SDL_Surface * pantalla) {
 
 	int bucle, bucle2, bucle3, bucle4, bucle5;
@@ -444,6 +455,7 @@ void reset_frameskip(void)
 #endif
 }
 
+#ifndef DEBUG_TSTADOS
 static int autoframeskip(void)
 {
 	static int anteriorskip=0;
@@ -489,6 +501,7 @@ static int autoframeskip(void)
 	sound_frameskip=0;
 	return ret;
 }
+#endif
 
 
 static void real_draw_screen(void)
@@ -508,7 +521,11 @@ static void real_draw_screen(void)
 	else
 #endif
 	{
+#ifndef DEBUG_TSTADOS
 		skipped=autoframeskip();
+#else
+		skipped=0;
+#endif
 		bdraw=(skipped==0);
 	}
 
@@ -548,10 +565,11 @@ to execute last instruction */
 void show_screen (int tstados) {
 #ifdef DEBUG_TSTADOS 
 	dbgf("show_screen(%i) counter=%i\n",tstados,cmpt.tstados_counter);
+	dbgf("currpix=%i(%i), currline=%i(%i)\n",cmpt.currpix,cmpt.pixancho,cmpt.currline,cmpt.pixalto);
 #endif
 #ifndef DREAMCAST
 	if (save_screen != screen || save_pixels != screen->pixels)
-		register_screen(screen);
+		change_screen(screen);
 #endif
 	cmpt.tstados_counter += tstados;
 	while (cmpt.tstados_counter > 3) {
@@ -590,8 +608,17 @@ void show_screen (int tstados) {
 				paint_pixels(temporal);
 			}
 		}
+#ifdef DEBUG_TSTADOS
+		dbgf("+8 currpix = %i",cmpt.currpix);
+#endif
 		cmpt.currpix += 8;
+#ifdef DEBUG_TSTADOS
+		dbgf(" -> %i (%i)\n",cmpt.currpix,cmpt.pixancho);
+#endif
 		if (cmpt.currpix > cmpt.pixancho) {
+#ifdef DEBUG_TSTADOS
+			dbg("=0 currpix");
+#endif
 			cmpt.currpix = 0;
 			cmpt.currline++;
 			if (cmpt.currline > 40)	// COMP_FIRST_LINE)
@@ -1814,7 +1841,11 @@ void WrZ80 (unsigned short Addr, unsigned char Value) {
 			Value&=MASCARA_AF;
 	}
 #endif
-	dbgf("WrZ80(0x%.4X,0x%.2X)\n",Addr,Value);
+	{
+	unsigned _Value=Value;
+	_Value&=0xFF;
+	dbgf("WrZ80(0x%.4X,0x%.2X)\n",Addr,_Value);
+	}
 #endif
 	switch (Addr & 0xC000) {
 	case 0x0000:
@@ -1851,7 +1882,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 		register unsigned char r=((unsigned char)cmpt.shadowrom[Addr]);
 #ifdef DEBUG_MEMORY
 		if (!esopcode)
-			dbgf(" = 0x%.2X\n",r);
+			dbgf(" = 0x%.2X\n",r&0xff);
 #endif
 		return r;
 	}
@@ -1874,7 +1905,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 			register unsigned char r=((unsigned char) (*(cmpt.block0 + Addr)));
 #ifdef DEBUG_MEMORY
 			if (!esopcode)
-				dbgf(" = 0x%.2X\n",r);
+				dbgf(" = 0x%.2X\n",r&0xff);
 #endif
 			return r;
 		}
@@ -1885,7 +1916,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 			register unsigned char r=((unsigned char) (*(cmpt.block1 + Addr)));
 #ifdef DEBUG_MEMORY
 			if (!esopcode)
-				dbgf(" = 0x%.2X\n",r);
+				dbgf(" = 0x%.2X\n",r&0xff);
 #endif
 			return r;
 		}
@@ -1896,7 +1927,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 			register unsigned char r=((unsigned char) (*(cmpt.block2 + Addr)));
 #ifdef DEBUG_MEMORY
 			if (!esopcode)
-				dbgf(" = 0x%.2X\n",r);
+				dbgf(" = 0x%.2X\n",r&0xff);
 #endif
 			return r;
 		}
@@ -1907,7 +1938,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 			register unsigned char r=((unsigned char) (*(cmpt.block3 + Addr)));
 #ifdef DEBUG_MEMORY
 			if (!esopcode)
-				dbgf(" = 0x%.2X\n",r);
+				dbgf(" = 0x%.2X\n",r&0xff);
 #endif
 			return r;
 		}
@@ -1926,7 +1957,7 @@ unsigned char RdZ80 (unsigned short Addr) {
 
 void OutZ80 (unsigned short Port, unsigned char Value) {
 #ifdef DEBUG_MEMORY
-	dbgf("OutZ80(0x%.4X,0x%.2X)\n",Port,Value);
+	dbgf("OutZ80(0x%.4X,0x%.2X)\n",Port,Value&0xff);
 #endif
 
 	// Microdrive access
@@ -2026,7 +2057,7 @@ unsigned char InZ80 (unsigned short Port) {
 				pines &= 0xBF;	// sound input
 		}
 #ifdef DEBUG_MEMORY
-		dbgf(" = 0x%.2X\n",pines);
+		dbgf(" = 0x%.2X\n",pines&0xff);
 #endif
 		return (pines);
 	}
@@ -2034,7 +2065,7 @@ unsigned char InZ80 (unsigned short Port) {
 	if ((!(temporal_io & 0x0020)) && (cmpt.joystick == 1))
 	{
 #ifdef DEBUG_MEMORY
-		dbgf(" = cmpt.js = 0x%.2X\n",cmpt.js);
+		dbgf(" = cmpt.js = 0x%.2X\n",cmpt.js&0xff);
 #endif
 		return (cmpt.js);
 	}
@@ -2042,7 +2073,7 @@ unsigned char InZ80 (unsigned short Port) {
 	if (temporal_io == 0xFFFD)
 	{
 #ifdef DEBUG_MEMORY
-		dbgf(" = cmpt.ay_registers[%i] = 0x%.2X\n",cmpt.ay_latch,cmpt.ay_registers[cmpt.ay_latch]);
+		dbgf(" = cmpt.ay_registers[%i] = 0x%.2X\n",cmpt.ay_latch,cmpt.ay_registers[cmpt.ay_latch]&0xff);
 #endif
 		return (cmpt.ay_registers[cmpt.ay_latch]);
 	}
@@ -2059,7 +2090,7 @@ unsigned char InZ80 (unsigned short Port) {
 	
 	register unsigned char r=bus_empty();
 #ifdef DEBUG_MEMORY
-	dbgf(" = bus_empty() = 0x%.2X\n",r);
+	dbgf(" = bus_empty() = 0x%.2X\n",r&0xff);
 #endif
 	return r;
 }

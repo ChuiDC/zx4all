@@ -18,6 +18,8 @@ STRIP  = strip
 
 # RAZE - enable assembler support
 #RAZE = 1
+# RAZEC - enable alternative Z80 core
+#RAZEC = 1
 
 
 # TV_FILTER - enables OpenGL support
@@ -105,7 +107,11 @@ OBJS =	\
 
 ifdef RAZE
 CFLAGS+= -DUSE_RAZE
+ifdef RAZEC
+OBJS += src/z80/razec/raze.o
+else
 OBJS += src/z80/raze/raze.o
+endif
 else
 OBJS += src/z80/Z80/Z80.o 
 endif
