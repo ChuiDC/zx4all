@@ -2095,7 +2095,7 @@ unsigned char InZ80 (unsigned short Port) {
 	return r;
 }
 
-#ifndef USE_RAZE
+#if !defined(USE_RAZE) && !defined(USE_YAZE)
 void PatchZ80 (Z80 * R) {
 
 }

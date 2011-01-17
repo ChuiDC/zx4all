@@ -5,6 +5,119 @@
 
 #ifndef USE_RAZE
 
+#ifdef USE_YAZE
+
+#include "yaze/yaze.h"
+
+#define C_FLAG      0x01       /* 1: Carry/Borrow occured    */
+
+#define _z80_set_AF(VALUE) yaze_af[yaze_af_sel]=VALUE
+#define _z80_set_A(VALUE) yaze_af[yaze_af_sel]=(yaze_af[yaze_af_sel]&0xFF)|(VALUE<<8)
+#define _z80_set_F(VALUE) yaze_af[yaze_af_sel]=(yaze_af[yaze_af_sel]&0xFF00)|(VALUE)
+#define _z80_set_BC(VALUE) yaze_regs[yaze_regs_sel].bc=VALUE
+#define _z80_set_B(VALUE) yaze_regs[yaze_regs_sel].bc=(yaze_regs[yaze_regs_sel].bc&0xFF)|(VALUE<<8)
+#define _z80_set_C(VALUE) yaze_regs[yaze_regs_sel].bc=(yaze_regs[yaze_regs_sel].bc&0xFF00)|(VALUE)
+#define _z80_set_DE(VALUE) yaze_regs[yaze_regs_sel].de=VALUE
+#define _z80_set_D(VALUE) yaze_regs[yaze_regs_sel].de=(yaze_regs[yaze_regs_sel].de&0xFF)|(VALUE<<8)
+#define _z80_set_E(VALUE) yaze_regs[yaze_regs_sel].de=(yaze_regs[yaze_regs_sel].de&0xFF00)|(VALUE)
+#define _z80_set_HL(VALUE) yaze_regs[yaze_regs_sel].hl=VALUE
+#define _z80_set_H(VALUE) yaze_regs[yaze_regs_sel].hl=(yaze_regs[yaze_regs_sel].hl&0xFF)|(VALUE<<8)
+#define _z80_set_L(VALUE) yaze_regs[yaze_regs_sel].hl=(yaze_regs[yaze_regs_sel].hl&0xFF00)|(VALUE)
+#define _z80_set_IX(VALUE) yaze_ix=VALUE
+#define _z80_set_IY(VALUE) yaze_iy=VALUE
+#define _z80_set_PC(VALUE) yaze_pc=VALUE
+#define _z80_set_SP(VALUE) yaze_sp=VALUE
+#define _z80_set_AF1(VALUE) yaze_af[1-yaze_af_sel]=VALUE
+#define _z80_set_A1(VALUE) yaze_af[1-yaze_af_sel]=(yaze_af[1-yaze_af_sel]&0xFF)|(VALUE<<8)
+#define _z80_set_F1(VALUE) yaze_af[1-yaze_af_sel]=(yaze_af[1-yaze_af_sel]&0xFF00)|(VALUE)
+#define _z80_set_BC1(VALUE) yaze_regs[1-yaze_regs_sel].bc=VALUE
+#define _z80_set_B1(VALUE) yaze_regs[1-yaze_regs_sel].bc=(yaze_regs[1-yaze_regs_sel].bc&0xFF)|(VALUE<<8)
+#define _z80_set_C1(VALUE) yaze_regs[1-yaze_regs_sel].bc=(yaze_regs[1-yaze_regs_sel].bc&0xFF00)|(VALUE)
+#define _z80_set_DE1(VALUE) yaze_regs[1-yaze_regs_sel].de=VALUE
+#define _z80_set_D1(VALUE) yaze_regs[1-yaze_regs_sel].de=(yaze_regs[1-yaze_regs_sel].de&0xFF)|(VALUE<<8)
+#define _z80_set_E1(VALUE) yaze_regs[1-yaze_regs_sel].de=(yaze_regs[1-yaze_regs_sel].de&0xFF00)|(VALUE)
+#define _z80_set_HL1(VALUE) yaze_regs[1-yaze_regs_sel].hl=VALUE
+#define _z80_set_H1(VALUE) yaze_regs[1-yaze_regs_sel].hl=(yaze_regs[1-yaze_regs_sel].hl&0xFF)|(VALUE<<8)
+#define _z80_set_L1(VALUE) yaze_regs[1-yaze_regs_sel].hl=(yaze_regs[1-yaze_regs_sel].hl&0xFF00)|(VALUE)
+#define _z80_set_IFF(VALUE) yaze_IFF=VALUE
+#define _z80_set_I(VALUE) yaze_ir=(yaze_ir&0xFF)|(VALUE<<8)
+#define _z80_set_R(VALUE) yaze_ir=(yaze_ir&0xFF00)|(VALUE)
+
+#define _z80_get_AF() yaze_af[yaze_af_sel]
+#define _z80_get_A() yaze_af[yaze_af_sel]>>8
+#define _z80_get_F() yaze_af[yaze_af_sel]&0xFF
+#define _z80_get_BC() yaze_regs[yaze_regs_sel].bc
+#define _z80_get_B() yaze_regs[yaze_regs_sel].bc>>8
+#define _z80_get_C() yaze_regs[yaze_regs_sel].bc&0xFF
+#define _z80_get_DE() yaze_regs[yaze_regs_sel].de
+#define _z80_get_D() yaze_regs[yaze_regs_sel].de>>8
+#define _z80_get_E() yaze_regs[yaze_regs_sel].de&0xFF
+#define _z80_get_HL() yaze_regs[yaze_regs_sel].hl
+#define _z80_get_H() yaze_regs[yaze_regs_sel].hl>>8
+#define _z80_get_L() yaze_regs[yaze_regs_sel].hl&0xFF
+#define _z80_get_IX() yaze_ix
+#define _z80_get_IX_l() yaze_ix&0xFF
+#define _z80_get_IX_h() yaze_ix>>8
+#define _z80_get_IY() yaze_iy
+#define _z80_get_IY_l() yaze_iy&0xFF
+#define _z80_get_IY_h() yaze_iy>>8
+#define _z80_get_PC() yaze_pc
+#define _z80_get_PC_l() yaze_pc&0xFF
+#define _z80_get_PC_h() yaze_pc>>8
+#define _z80_get_SP() yaze_sp
+#define _z80_get_SP_l() yaze_sp&0xFF
+#define _z80_get_SP_h() yaze_sp>>8
+#define _z80_get_AF1() yaze_af[1-yaze_af_sel]
+#define _z80_get_A1() yaze_af[1-yaze_af_sel]>>8
+#define _z80_get_F1() yaze_af[1-yaze_af_sel]&0xFF
+#define _z80_get_BC1() yaze_regs[1-yaze_regs_sel].bc
+#define _z80_get_B1() yaze_regs[1-yaze_regs_sel].bc>>8
+#define _z80_get_C1() yaze_regs[1-yaze_regs_sel].bc&0xFF
+#define _z80_get_DE1() yaze_regs[1-yaze_regs_sel].de
+#define _z80_get_D1() yaze_regs[1-yaze_regs_sel].de>>8
+#define _z80_get_E1() yaze_regs[1-yaze_regs_sel].de&0xFF
+#define _z80_get_HL1() yaze_regs[1-yaze_regs_sel].hl
+#define _z80_get_H1() yaze_regs[1-yaze_regs_sel].hl>>8
+#define _z80_get_L1() yaze_regs[1-yaze_regs_sel].hl&0xFF
+#define _z80_get_IFF() yaze_IFF
+#define _z80_get_I() yaze_ir>>8
+#define _z80_get_R() yaze_ir&0xFF
+#define _z80_get_R2() 0
+
+#define _z80_get_last_cycles() yaze_tstates
+#ifndef DEBUG_Z80
+#define _z80_release() yaze_release()
+#else
+#define _z80_release()
+#endif
+
+static __inline__ unsigned _z80_emulate(unsigned ncycles)
+{
+	yaze_tstates=0;
+	return yaze_emulate(ncycles);
+}
+
+#define _z80_interrupt(VEC) yaze_int(VEC)
+#define _z80_reset() \
+{ \
+	yaze_af_sel=yaze_regs_sel=0; \
+	yaze_pc=yaze_sp=0; \
+	yaze_af[0]=yaze_af[1]=0x40; \
+	yaze_regs[0].bc=yaze_regs[1].bc=0; \
+	yaze_regs[0].de=yaze_regs[1].de=0; \
+	yaze_regs[0].hl=yaze_regs[1].hl=0; \
+	yaze_IFF=yaze_ir=0; \
+	yaze_ix=0xFFFF; \
+	yaze_iy=0xFFFF; \
+}
+
+
+#define _z80_resetmapping_fetch()
+#define _z80_resetmapping()
+#define _z80_init()
+
+#else
+
 #include "Z80/Z80.h"
 
 extern Z80 procesador;
@@ -40,8 +153,6 @@ extern Z80 procesador;
 #define _z80_set_IFF(VALUE) procesador.IFF=VALUE
 #define _z80_set_I(VALUE) procesador.I=VALUE
 #define _z80_set_R(VALUE) procesador.R=VALUE
-
-
 
 #define _z80_get_AF() procesador.AF.W
 #define _z80_get_A() procesador.AF.B.h
@@ -120,6 +231,7 @@ static __inline__ unsigned _z80_emulate(unsigned ncycles)
 	procesador.TStates=0; \
 }
 
+#endif
 #else
 
 extern unsigned __z80_last_cycles;
