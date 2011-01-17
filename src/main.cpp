@@ -37,7 +37,7 @@ KOS_INIT_FLAGS(INIT_DEFAULT);
 #include "win_icon.h"
 #endif
 
-#ifndef USE_RAZE
+#if !defined(USE_RAZE) && !defined(USE_YAZE)
 Z80 procesador;
 #else
 unsigned __z80_last_cycles;

@@ -79,7 +79,11 @@ int save_z80(char *filename) {
 #ifdef USE_RAZE
   value=z80_get_reg(Z80_REG_IFF1);
 #else
+#ifdef USE_YAZE
+  if (yaze_IFF&1)
+#else
   if (procesador.IFF&IFF_1)
+#endif
     value=1;
   else
     value=0;
@@ -90,7 +94,11 @@ int save_z80(char *filename) {
 #ifdef USE_RAZE
   value=z80_get_reg(Z80_REG_IFF2);
 #else
+#ifdef USE_YAZE
+  if (yaze_IFF&2)
+#else
   if (procesador.IFF&IFF_2)
+#endif
     value=1;
   else
     value=0;
@@ -101,10 +109,18 @@ int save_z80(char *filename) {
 #ifdef USE_RAZE
   value=z80_get_reg(Z80_REG_IM);
 #else
+#ifdef USE_YAZE
+  if (yaze_IFF&1)
+#else
   if (procesador.IFF&IFF_IM1)
+#endif
     value=1;
   else
+#ifdef USE_YAZE
+    if (yaze_IFF&2)
+#else
     if(procesador.IFF&IFF_IM2)
+#endif
       value=2;
     else
       value=0;
@@ -540,19 +556,39 @@ void load_snap(struct z80snapshot *snap) {
 	  z80_set_reg(Z80_REG_IRQLine,1);
 #else
   if(snap->IFF1)
+#ifdef USE_YAZE
+    yaze_IFF|=3;
+#else
     procesador.IFF|=(IFF_1|IFF_EI);
+#endif
   if(snap->IFF2)
+#ifdef USE_YAZE
+    yaze_IFF|=2;
+#else
     procesador.IFF|=IFF_2;
+#endif
 
   switch(snap->Imode) {
   case 0:
+#ifdef USE_YAZE
+    yaze_IFF&=~3;
+#else
     procesador.IFF&=~(IFF_IM1|IFF_IM2);
+#endif
     break;
   case 1:
+#ifdef USE_YAZE
+    yaze_IFF=(yaze_IFF&~2)|1;
+#else
     procesador.IFF=(procesador.IFF&~IFF_IM2)|IFF_IM1;
+#endif
     break;
   case 2:
+#ifdef USE_YAZE
+    yaze_IFF=(yaze_IFF&~1)|2;
+#else
     procesador.IFF=(procesador.IFF&~IFF_IM1)|IFF_IM2;
+#endif
     break;
   }
 #endif
