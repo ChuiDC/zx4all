@@ -83,12 +83,19 @@ volatile int yaze_stop;
 
 #define CALLC(cond) {							\
     if (cond) {								\
+	icount-=7;							\
 	FASTREG adrr = GetWORD(PC);					\
 	PUSH(PC+2);							\
 	PC = adrr;							\
     }									\
     else								\
 	PC += 2;							\
+}
+
+#define CALLC_without() {							\
+	FASTREG adrr = GetWORD(PC);					\
+	PUSH(PC+2);							\
+	PC = adrr;							\
 }
 
 /* load Z80 registers into (we hope) host registers */
@@ -150,13 +157,16 @@ unsigned yaze_emulate(unsigned ncycles) {
 #ifdef DEBUG_YAZE
     while (!yaze_stop) {
 #else
-    while (1) {
+    icount=ncycles;
+    while (icount>0) {
 #endif
 #ifdef YAZE_DIRECT_RAM
-    switch(RAM_pp(PC)) {
+    unsigned char opcode=RAM_pp(PC);
 #else
-    switch(RdZ80(PC++)) {
+    unsigned char opcode=RdZ80(PC++);
 #endif
+    icount-=Cycles[opcode];
+    switch(opcode) {
 	case 0x00:			/* NOP */
 		break;
 	case 0x01:			/* LD BC,nnnn */
@@ -238,7 +248,12 @@ unsigned yaze_emulate(unsigned ncycles) {
 			(sum & 0x28) | (AF & 0xc4) | (temp & 1);
 		break;
 	case 0x10:			/* DJNZ dd */
-		PC += ((BC -= 0x100) & 0xff00) ? (signed char) GetBYTE(PC) + 1 : 1;
+		if ((BC -= 0x100) & 0xff00) {
+			PC+=(signed char) GetBYTE(PC) + 1;
+			icount-=5;
+		} else {
+			PC++;
+		}
 		break;
 	case 0x11:			/* LD DE,nnnn */
 		DE = GetWORD(PC);
@@ -317,7 +332,12 @@ unsigned yaze_emulate(unsigned ncycles) {
 			(sum & 0x28) | (AF & 0xc4) | (temp & 1);
 		break;
 	case 0x20:			/* JR NZ,dd */
-		PC += (!TSTFLAG(Z)) ? (signed char) GetBYTE(PC) + 1 : 1;
+		if (!TSTFLAG(Z)) {
+		       PC += (signed char) GetBYTE(PC) + 1;
+		       icount-=5;
+		} else {
+		       PC++;
+		}
 		break;
 	case 0x21:			/* LD HL,nnnn */
 		HL = GetWORD(PC);
@@ -379,7 +399,12 @@ unsigned yaze_emulate(unsigned ncycles) {
 			(AF & 0x12) | partab[acu] | cbits;
 		break;
 	case 0x28:			/* JR Z,dd */
-		PC += (TSTFLAG(Z)) ? (signed char) GetBYTE(PC) + 1 : 1;
+		if (TSTFLAG(Z)) {
+			PC += (signed char) GetBYTE(PC) + 1;
+			icount-=5;
+		} else {
+			PC++;
+		}
 		break;
 	case 0x29:			/* ADD HL,HL */
 		HL &= 0xffff;
@@ -420,7 +445,12 @@ unsigned yaze_emulate(unsigned ncycles) {
 		AF = (~AF & ~0xff) | (AF & 0xc5) | ((~AF >> 8) & 0x28) | 0x12;
 		break;
 	case 0x30:			/* JR NC,dd */
-		PC += (!TSTFLAG(C)) ? (signed char) GetBYTE(PC) + 1 : 1;
+		if (!TSTFLAG(C)) {
+			PC+=(signed char) GetBYTE(PC) + 1;
+			icount-=5;
+		} else {
+			PC++;
+		}
 		break;
 	case 0x31:			/* LD SP,nnnn */
 		SP = GetWORD(PC);
@@ -457,7 +487,12 @@ unsigned yaze_emulate(unsigned ncycles) {
 		AF = (AF&~0x3b)|((AF>>8)&0x28)|1;
 		break;
 	case 0x38:			/* JR C,dd */
-		PC += (TSTFLAG(C)) ? (signed char) GetBYTE(PC) + 1 : 1;
+		if (TSTFLAG(C)) {
+			PC+=(signed char) GetBYTE(PC) + 1;
+			icount-=5;
+		} else {
+			PC++;
+		}
 		break;
 	case 0x39:			/* ADD HL,SP */
 		HL &= 0xffff;
@@ -1203,7 +1238,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 			(cbits & 0x10) | ((cbits >> 8) & 1);
 		break;
 	case 0xC0:			/* RET NZ */
-		if (!TSTFLAG(Z)) POP(PC);
+		if (!TSTFLAG(Z)) { POP(PC); icount-=6; }
 		break;
 	case 0xC1:			/* POP BC */
 		POP(BC);
@@ -1234,7 +1269,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0;
 		break;
 	case 0xC8:			/* RET Z */
-		if (TSTFLAG(Z)) POP(PC);
+		if (TSTFLAG(Z)) { POP(PC); icount-=6; }
 		break;
 	case 0xC9:			/* RET */
 		POP(PC);
@@ -1243,8 +1278,10 @@ unsigned yaze_emulate(unsigned ncycles) {
 		JPC(TSTFLAG(Z));
 		break;
 	case 0xCB:			/* CB prefyaze_ix */
+		op = GetBYTE(PC);
+		icount-=CyclesCB[op];
 		adr = HL;
-		switch ((op = GetBYTE(PC)) & 7) {
+		switch (op&7) {
 		case 0: ++PC; acu = hreg(BC); break;
 		case 1: ++PC; acu = lreg(BC); break;
 		case 2: ++PC; acu = hreg(DE); break;
@@ -1326,7 +1363,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		CALLC(TSTFLAG(Z));
 		break;
 	case 0xCD:			/* CALL nnnn */
-		CALLC(1);
+		CALLC_without();
 		break;
 	case 0xCE:			/* ADC A,nn */
 		temp = GetBYTE_pp(PC);
@@ -1342,7 +1379,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 8;
 		break;
 	case 0xD0:			/* RET NC */
-		if (!TSTFLAG(C)) POP(PC);
+		if (!TSTFLAG(C)) { POP(PC); icount-=6; }
 		break;
 	case 0xD1:			/* POP DE */
 		POP(DE);
@@ -1373,7 +1410,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0x10;
 		break;
 	case 0xD8:			/* RET C */
-		if (TSTFLAG(C)) POP(PC);
+		if (TSTFLAG(C)) { POP(PC); icount-=6; }
 		break;
 	case 0xD9:			/* EXX */
 		yaze_regs[yaze_regs_sel].bc = BC;
@@ -1394,7 +1431,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 		CALLC(TSTFLAG(C));
 		break;
 	case 0xDD:			/* DD prefyaze_ix */
-		switch (op = GetBYTE_pp(PC)) {
+		op = GetBYTE_pp(PC);
+		icount-=CyclesXX[op];
+		switch (op) {
 		case 0x09:			/* ADD IX,BC */
 			IX &= 0xffff;
 			BC &= 0xffff;
@@ -1841,7 +1880,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 		case 0xCB:			/* CB prefyaze_ix */
 			adr = IX + (signed char) GetBYTE_pp(PC);
 			adr = adr;
-			switch ((op = GetBYTE(PC)) & 7) {
+			op = GetBYTE(PC);
+			icount-=CyclesXXCB[op];
+			switch (op&7) {
 			case 0: ++PC; acu = hreg(BC); break;
 			case 1: ++PC; acu = lreg(BC); break;
 			case 2: ++PC; acu = hreg(DE); break;
@@ -1951,7 +1992,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0x18;
 		break;
 	case 0xE0:			/* RET PO */
-		if (!TSTFLAG(P)) POP(PC);
+		if (!TSTFLAG(P)) { POP(PC); icount-=6; }
 		break;
 	case 0xE1:			/* POP HL */
 		POP(HL);
@@ -1977,7 +2018,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0x20;
 		break;
 	case 0xE8:			/* RET PE */
-		if (TSTFLAG(P)) POP(PC);
+		if (TSTFLAG(P)) { POP(PC); icount-=6; }
 		break;
 	case 0xE9:			/* JP (HL) */
 		PC = HL;
@@ -1992,7 +2033,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 		CALLC(TSTFLAG(P));
 		break;
 	case 0xED:			/* ED prefyaze_ix */
-		switch (op = GetBYTE_pp(PC)) {
+		op = GetBYTE_pp(PC);
+		icount-=CyclesED[op];
+		switch (op) {
 		case 0x40:			/* IN B,(C) */
 			temp = Input(lreg(BC));
 			Sethreg(BC, temp);
@@ -2318,7 +2361,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			do {
 				acu = GetBYTE_pp(HL);
 				PutBYTE_pp(DE, acu);
+				icount-=21;
 			} while (--BC);
+			icount+=5;
 			acu += hreg(AF);
 			AF = (AF & ~0x3e) | (acu & 8) | ((acu & 2) << 4);
 			break;
@@ -2329,7 +2374,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 				temp = GetBYTE_pp(HL);
 				op = --BC != 0;
 				sum = acu - temp;
+				icount-=21;
 			} while (op && sum != 0);
+			icount+=5;
 			cbits = acu ^ temp ^ sum;
 			AF = (AF & ~0xfe) | (sum & 0x80) | (!(sum & 0xff) << 6) |
 				(((sum - ((cbits&16)>>4))&2) << 4) |
@@ -2342,7 +2389,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			temp = hreg(BC);
 			do {
 				PutBYTE(HL, Input(lreg(BC))); ++HL;
+				icount-=21;
 			} while (--temp);
+			icount+=5;
 			Sethreg(BC, 0);
 			SETFLAG(N, 1);
 			SETFLAG(Z, 1);
@@ -2351,7 +2400,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			temp = hreg(BC);
 			do {
 				Output(lreg(BC), GetBYTE(HL)); ++HL;
+				icount-=21;
 			} while (--temp);
+			icount+=5;
 			Sethreg(BC, 0);
 			SETFLAG(N, 1);
 			SETFLAG(Z, 1);
@@ -2361,7 +2412,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			do {
 				acu = GetBYTE_mm(HL);
 				PutBYTE_mm(DE, acu);
+				icount-=21;
 			} while (--BC);
+			icount+=5;
 			acu += hreg(AF);
 			AF = (AF & ~0x3e) | (acu & 8) | ((acu & 2) << 4);
 			break;
@@ -2372,7 +2425,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 				temp = GetBYTE_mm(HL);
 				op = --BC != 0;
 				sum = acu - temp;
+				icount-=21;
 			} while (op && sum != 0);
+			icount+=5;
 			cbits = acu ^ temp ^ sum;
 			AF = (AF & ~0xfe) | (sum & 0x80) | (!(sum & 0xff) << 6) |
 				(((sum - ((cbits&16)>>4))&2) << 4) |
@@ -2385,7 +2440,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			temp = hreg(BC);
 			do {
 				PutBYTE(HL, Input(lreg(BC))); --HL;
+				icount-=21;
 			} while (--temp);
+			icount+=5;
 			Sethreg(BC, 0);
 			SETFLAG(N, 1);
 			SETFLAG(Z, 1);
@@ -2394,7 +2451,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 			temp = hreg(BC);
 			do {
 				Output(lreg(BC), GetBYTE(HL)); --HL;
+				icount-=21;
 			} while (--temp);
+			icount+=5;
 			Sethreg(BC, 0);
 			SETFLAG(N, 1);
 			SETFLAG(Z, 1);
@@ -2410,7 +2469,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0x28;
 		break;
 	case 0xF0:			/* RET P */
-		if (!TSTFLAG(S)) POP(PC);
+		if (!TSTFLAG(S)) { POP(PC); icount-=6; }
 		break;
 	case 0xF1:			/* POP AF */
 		POP(AF);
@@ -2435,7 +2494,7 @@ unsigned yaze_emulate(unsigned ncycles) {
 		PUSH(PC); PC = 0x30;
 		break;
 	case 0xF8:			/* RET M */
-		if (TSTFLAG(S)) POP(PC);
+		if (TSTFLAG(S)) { POP(PC); icount-=6; }
 		break;
 	case 0xF9:			/* LD SP,HL */
 		SP = HL;
@@ -2450,7 +2509,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 		CALLC(TSTFLAG(S));
 		break;
 	case 0xFD:			/* FD prefyaze_ix */
-		switch (op = GetBYTE_pp(PC)) {
+		op = GetBYTE_pp(PC);
+		icount-=CyclesXX[op];
+		switch (op) {
 		case 0x09:			/* ADD IY,BC */
 			IY &= 0xffff;
 			BC &= 0xffff;
@@ -2897,7 +2958,9 @@ unsigned yaze_emulate(unsigned ncycles) {
 		case 0xCB:			/* CB prefyaze_ix */
 			adr = IY + (signed char) GetBYTE_pp(PC);
 			adr = adr;
-			switch ((op = GetBYTE(PC)) & 7) {
+			op = GetBYTE(PC);
+			icount-=CyclesXXCB[op];
+			switch (op&7) {
 			case 0: ++PC; acu = hreg(BC); break;
 			case 1: ++PC; acu = lreg(BC); break;
 			case 2: ++PC; acu = hreg(DE); break;

@@ -21,7 +21,7 @@ STRIP  = strip
 # RAZEC - enable alternative RAZE Z80 core
 #RAZEC = 1
 # YAZE - enable YAZE Z80 core
-#YAZE = 1
+YAZE = 1
 
 
 # TV_FILTER - enables OpenGL support
